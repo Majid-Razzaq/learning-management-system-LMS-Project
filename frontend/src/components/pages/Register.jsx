@@ -1,29 +1,41 @@
 import React from 'react'
 import Layout from '../common/Layout'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { apiUrl } from '../common/Config'
+import toast from 'react-hot-toast'
 
 const Register = () => {
+
+    const navigate = useNavigate();
 
     const{
         handleSubmit, register, formState: {errors}, setError
     } = useForm();
 
     const onSubmit = async (data) => {
-        await fetch(`${apiUrl}/register`,{
+
+        await fetch(`${apiUrl}register`,{
             method: 'POST',
             headers:{
                 'Content-type' : 'application/json',
                 'Accept' : 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         })
         .then(res => res.json())
         .then(result => {
             console.log(result);
-            
-        })
+            if(result.status == 200){
+                toast.success(result.message);
+                navigate('/account/login');
+            }else{
+                const errors = result.errors;
+                Object.keys(errors).forEach(field => {
+                    setError(field,{message: errors[field][0]})
+                }); 
+            }
+        });
     };
 
   return (
